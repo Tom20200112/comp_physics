@@ -1,3 +1,5 @@
+STUFF = "Hi"
+
 import cython
 import numpy as np
 

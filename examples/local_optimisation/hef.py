@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append("/Users/tomzhang/Documents/计算物理/examples")
+
 from typing import Callable
 
 import numpy as np
