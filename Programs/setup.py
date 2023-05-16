@@ -7,8 +7,8 @@ import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
 
 ext_modules = [
-    Extension('minimize_thomson_c',
-              sources=['./minimize_thomson/minimize_thomson.pyx'],
+    Extension('minimize_thomson.minimize_thomson_c',
+              sources=['./minimize_thomson/minimize_thomson_c.pyx'],
               libraries=['m'],
               )
 ]
