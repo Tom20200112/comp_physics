@@ -1,4 +1,14 @@
 Lessons/Books
 .DS_Store
 .vscode/
+*
+!*/
+!*.*
+*.out
+*.log
+*.bbl
+*.aux
+*.blg
+*.dSYM
+*.synctex.gz
 __pycache__/
