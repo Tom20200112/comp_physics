@@ -4,7 +4,7 @@
 
 int main(void) {
     int *board;
-    int testsize = 100;
+    int testsize = 50;
     board = (int *)malloc(sizeof(int) * testsize * testsize);
     srand(time(NULL));
 
