@@ -1,6 +1,7 @@
 \documentclass[letterpaper,12pt]{article}
 
 \usepackage{hyperref} % adds hyper links inside the generated pdf file
+
 \usepackage{placeins}
 \usepackage{tabularx} % extra features for tabular environment
 \usepackage{amsmath}  % improve math presentation
@@ -9,7 +10,6 @@
 \usepackage{physics}
 \usepackage{listings}
 \usepackage{enumitem}
-\usepackage{cleveref}
 
 \usepackage{CJKutf8}
 \usepackage[numbers]{natbib}
@@ -19,7 +19,7 @@
 \usepackage{algpseudocode}
 
 \usepackage[margin=1in,letterpaper]{geometry} % decreases margins
-\usepackage{cite} % takes care of citations
+% takes care of citations
 
 \bibliographystyle{plain}
 \hypersetup{
@@ -35,13 +35,14 @@
 
 \begin{document}
 
+
 \title{Report on \textbf{Project: Computer simulations of molecular liquids}}
 \author{Zhicheng Zhang}
 \date{\today}
 \maketitle
 
 \begin{abstract}
-In this project, I applied molecular simulation methods to studying the properties of a 2D system of particles. The methods include molecular dynamics (MD) and Metropolis Monte Carlo (MC) simulation. I modeled the system using different model interaction potentials among the particles, including Lennard-Jones (LJ) potential, model atomic potential and model colloidal potential, all pairwise and with a cut-off distance $r_c$. With carefully chosen initial conditions and boundary conditions, I was able to realize equilibrium states, calculate average total energies and deviations, calculate the radial distributions functions, evaluate the pressure, etc. \textbf{Special notes:} 
+In this project, I applied molecular simulation methods to studying the properties of a 2D system of particles. The methods include molecular dynamics (MD) and Metropolis Monte Carlo (MC) simulation. I modeled the system using different model interaction potentials among the particles, including Lennard-Jones (LJ) potential, model atomic potential and model colloidal potential, all pairwise and with a cut-off distance $r_c$. With carefully chosen initial conditions and boundary conditions, I was able to realize equilibrium states, calculate average total energies and deviations, calculate the radial distributions functions, evaluate the pressure, etc. \textbf{Special notes:} Some of my codes were run by PyPy3 interpreter. Documentations can be found here \href{https://doc.pypy.org/en/latest/}{PyPy documentation}.
 \end{abstract}
 
 
@@ -267,14 +268,14 @@ In the above algorithm, \texttt{npart} is the number of particles. The function 
         \For{i=1: npart-1} 
             \For{j=i+1: npart}  \Comment{loop over all pairs}
                 \State xr=x(i)-x(j)
-                \If{xr<-0.5*box}
+                \If{xr $<$ -0.5*box}
                     \State xr=xr+box  \Comment{periodic boundary condition}
                 \EndIf
-                \If{xr>=0.5*box}
+                \If{xr $>=$ 0.5*box}
                     \State xr=xr-box  \Comment{minimum-image convention}
                 \EndIf
                 \State r2=xr**2
-                \If{r2<rc2}  \Comment{test cutoff}
+                \If{r2 $<$ rc2}  \Comment{test cutoff}
                     \State f(i)=f(i)+force(xr)
                     \State f(j)=f(j)-force(xr)  \Comment{update force}
                     \State en=en+potential(r2) \Comment{update energy}
@@ -344,7 +345,7 @@ Combining the above three algorithms, we can realize a complete molecular dynami
     \begin{algorithmic}[1]
         \State call \Call{init}{}   \Comment{initialize}
         \State t=0
-        \While {t<tmax}
+        \While {t $<$ tmax}
             \State call \Call{force}{}    \Comment{determine forces}
             \State call \Call{integrate}{} \Comment{integrate equations of motion}
             \State t=t+delt
@@ -399,7 +400,7 @@ It is easily verified that the following choice of transition probability (rate)
             \State eno=\Call{ener}{x(o)}  \Comment{old energy}
             \State xn=x(o)+randx()    \Comment{random displacement}
             \State enn=\Call{ener}{xn}  \Comment{new energy}
-            \If{ranf()<exp(-beta*(enn-eno))}   \Comment{Metropolis acceptance rule}
+            \If{ranf() $<$ exp(-beta*(enn-eno))}   \Comment{Metropolis acceptance rule}
                 \State x(o)=xn
             \EndIf
             \State call \Call{sample}{}
@@ -452,7 +453,7 @@ Their plots are as follows.
 
 \subsection{TASK2}
 This task requires me to do the simulation with two initial conditions: random positions and ordered lattice, using MC and MD methods. 
-\subsubsection{Random positions}
+\subsubsection{Random positions}\label{subsubsec:rand_pos}
 
 \begin{enumerate}[label=(\alph*)]
     \item Monte Carlo simulation
@@ -494,6 +495,7 @@ This task requires me to do the simulation with two initial conditions: random p
     \end{equation}
     The relative fluctuation of the energy is
     \begin{equation}
+        \label{Eq:r_fluc_mc1}
         \left| \frac{\delta U}{\left \langle U\right\rangle} \right|\approx 1.15\%
     \end{equation} 
 
@@ -540,13 +542,13 @@ This task requires me to do the simulation with two initial conditions: random p
     In a constant temperature simulation, I first specify the initial positions and momenta. Then I will integrate the equations of motion until the first stochastic collision, which happens at the time determined by a random variable following Poisson distribution. I randomly select a particle which suffers this collision, and its momentum is instantaneously switched to a value generated from Maxwell-Boltzmann distribution under temperature $T$. The Newtonian equations are then integrated until the next collision. This process is repeated to the end of the simulation.
 
     \vspace{\baselineskip}
-    For the first set of fixed conditions, $T1=0.728,\rho_1=0.8442$, I run the simulation for 5000 steps. I have chosen $\lambda=3$, and each time step $\delta t=0.014$, getting a final configuration as the figure below 
+    For the first set of fixed conditions, $T_1=0.728,\rho_1=0.8442$, I run the simulation for 5000 steps. I have chosen $\lambda=3$, each time step $\delta t=0.014$, and initial temperature $T_0=0.03*T_1$, getting a final configuration as the figure below 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\textwidth]{final_config_md1.png}
         \caption{MD final configuration 1} 
     \end{figure}
-    From the final configurations of MC and MD simulations, one may be surprised to discover that the particles tend to be evenly and regularly placed in the box -- some even exhibit hexagonal or square lattice structure! But these symmetries are not presupposed. This may explain the formation of solids, especially crystals. 
+    From the final configurations of MC and MD simulations, one may be surprised to discover that the particles tend to be evenly and regularly placed in the box---some even exhibit hexagonal or square lattice structure! But these symmetries are not presupposed. This may explain the formation of solids, especially crystals. 
 
     The total potential energy as a function of time is plotted as follows
     \begin{figure}[H]
@@ -569,13 +571,137 @@ This task requires me to do the simulation with two initial conditions: random p
     \end{equation}
     It can be seen that the average energy is a lot higher than in MC simulation (for the same fixed condition), and the variance in $U$ is also larger. Although the final configuration resembles that in MC simulation, I wonder if I have not reached the real equilibrium.
     
-    Therefore I reset $\lambda$ and $\delta t$, and manage to find a better equilibrium. 
+    Therefore I reset $\lambda=3$, $\delta t=0.014$, and most importantly, $T_0=0.001*T_1$, and manage to find a better equilibrium. After 10000 simulation steps, I indeed get a prettier equilibrium. The energy-versus-time figure is 
+    \begin{figure}[H]
+        \centering
+        \includegraphics{Project/energy_to_time_md3.png}
+        \caption{MD energy versus step 3}
+        \label{fig:energy_to_time_md3}
+    \end{figure}
+    Calculating the statistical values, 
+    \begin{equation}
+        \begin{aligned}
+            \left\langle U\right\rangle&=-211.875 \\
+            \delta U^2&=7.163
+        \end{aligned}
+    \end{equation}
+    both are absolutely larger than those in MC simulation. Nonetheless, the relative fluctuation is 
+    \begin{equation}
+        \left| \frac{\delta U}{\left \langle U\right\rangle} \right|\approx 1.26\%
+    \end{equation}
+    which is not far away from that in MC simulation (Eq. \ref{Eq:r_fluc_mc1}). Why do I get a lower equilibrium energy, larger energy fluctuation and comparable relative fluctuation to what I get in MC simulation? I cannot explain right now. Besides, I find my molecular dynamics simulation very sensitively depending on the initial temperature. Slightly changing the initial temperature will greatly affect the equilibrium energy. This poses serious concerns on the reliability of my MD algorithm. It is also tricky to determine the simulation time step. A large time step causes particles to come too close together, and the energy may explode; while a small time step makes the simulation much longer or even not converge. 
+
+    After all, I can successfully reach long-time equilibrium, and this proves my algorithm right. There are so many parameters free for adjustment, and my choice is far from the best, so there is substantial space for improvement of efficiency and reliability.
+    \vspace{\baselineskip}
+    
+    For the second set of fixed conditions, $T_2=1.0,\rho_2=0.1$, I run the simulation for 5000 steps, with $\lambda=3,\ \delta t=0.015$, and initial temperature $T_0=0.01T_2$. The final configuration is 
+    \begin{figure}[H]
+        \centering
+        \includegraphics{Project/final_config_md2.png}
+        \caption{MD final configuration2}
+        \label{fig:final_config_md2}
+    \end{figure}
+    The energy-versus-time figure is
+    \begin{figure}[H]
+        \centering
+        \includegraphics{Project/energy_to_time_md4.png}
+        \caption{MD energy versus time 4}
+        \label{fig:energy_to_time_md4}
+    \end{figure}
+    The equilibrium is reached instantly, and the statistical values are 
+    \begin{equation}
+        \begin{aligned}
+            \left\langle U\right\rangle&= -45.237    \\
+            \left\langle u\right\rangle&=\frac{\left\langle U\right\rangle}{N}=-0.503               \\
+            \delta U^2&=8.871  \\
+            \left| \frac{\delta U}{\left \langle U\right\rangle} \right|&\approx 6.58\%
+        \end{aligned}
+    \end{equation}
+    Still, average energy and energy fluctuation are absolutely larger than those in MC simulation, but relative energy fluctuation is smaller. 
 \end{enumerate}
 
 \subsubsection{Ordered lattice}
+In section \ref{subsubsec:rand_pos} we have seen that equilibrium in condition $(T_1,\rho_1)$ exhibits lattice symmetries more, so in the present section, I focus on the simulation of ordered lattice in condition $(T_1,\rho_1)$. The initial configuration looks like
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/init_config_lattice1.png}
+    \caption{initial lattice configuration 1}
+    \label{fig:init_config_lattice1}
+\end{figure}
+\begin{enumerate}[label=(\alph*)]
+    \item Monte Carlo simulation
+    
+    I run the simulation for 20000 steps, with normally-distributed random displacement $\sigma=0.5$, and got the final configuration 
+    \begin{figure}[H]
+        \centering
+        \includegraphics{Project/final_config_lattice_mc1.png}
+        \caption{MC final lattice configuration 1}
+        \label{fig:final_config_lattice_mc1}
+    \end{figure}
+    The lattice structure is significantly damaged. The energy-versus-time figure shows
+    \begin{figure}[H]
+        \centering
+        \includegraphics{Project/energy_to_time_lattice_mc1.png}
+        \caption{MC lattice energy versus time 1}
+        \label{fig:energy_to_time_lattice_mc1}
+    \end{figure}
+    The statistical values are
+    \begin{equation}
+        \label{Eq:mc_stat_lattice1}
+        \begin{aligned}
+            \left\langle U\right\rangle&= -168.792    \\
+            \left\langle u\right\rangle&=\frac{\left\langle U\right\rangle}{N}=-2.084            \\
+            \delta U^2&=20.126  \\
+            \left| \frac{\delta U}{\left \langle U\right\rangle} \right|&\approx 2.66\%
+        \end{aligned}
+    \end{equation}
+    which are all greater than those calculated in the random positions case. The reason may lie in the fact that the ordered lattice gains an extremely low energy at the beginning (perhaps close to the global minimum), and since the temperature is low, it is not likely for the system to jump out of this "potential well". In contrast, when I initialize the system with random positions, the energy is expected to be relatively high, and again since the temperature is low, the random displacements may bring the system to some local minima and it will never get out. The local minima and global minimum of the energy have relations unsolvable for me, and the fluctuation of energy might depend on the potential landscapes around the minima. It is hard to say how much my calculated statistical values represent real physics. 
+
+    \item molecular dynamics simulation
+
+    I run the simulation for 5000 steps, with time step $\delta t=0.013$, $\lambda=3$, and $T_0=0.1T_1$. The final configuration is 
+    \begin{figure}[H]
+        \centering
+        \includegraphics{Project/final_config_lattice_md1.png}
+        \caption{MD lattice final configuration 1}
+        \label{fig:final_config_lattice_md1}
+    \end{figure}
+    The statistical values are 
+    \begin{equation}
+        \begin{aligned}
+            \left\langle U\right\rangle&= -125.847    \\
+            \left\langle u\right\rangle&=\frac{\left\langle U\right\rangle}{N}=-1.554            \\
+            \delta U^2&=263.118  \\
+            \left| \frac{\delta U}{\left \langle U\right\rangle} \right|&\approx 12.9\%
+        \end{aligned}
+    \end{equation}
+    The relative energy fluctuation is of the same magnitude as that in random positions condition. We can see the lattice structure is crushed, and the low average energy may be also due to the low initial energy. The large fluctuation in energy may be caused by the higher initial temperature $T_0=0.1T_1$.
+\end{enumerate}
 
 \subsection{TASK3}
 The aim of this task is to study the relation between $\left\langle U\right\rangle$, $\delta U$ and the system size $N$. 
+
+I simulate for $N=9,16,25,36,49,64,81,100,121,225$, the plots are as follows
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/U-size1.png}
+    \caption{average energy versus N}
+    \label{fig:U-size1}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/U-size.png}
+    \caption{average energy versus 1/N}
+    \label{fig:U-size}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/deviation-size.png}
+    \caption{energy mean square deviation versus 1/N}
+    \label{fig:deviation-size}
+\end{figure}
+Despite some instabilities, from the two figures we clearly notice $U(N\rightarrow\infty)=-\infty$, and $\delta U(N\rightarrow\infty)=\infty$. I did not use hard-boundary condition because it is not suitable for macroscopic simulations. Fig. \ref{fig:U-size1} demonstrates apparent linear dependence of $U$ on $N$, which hard-boundary condition cannot offer. In a hard box, as the proportion of boundary particles to all particles becomes smaller when the cluster becomes larger, the $U-N$ plot will eventually become steeper and more linear.
+
 
 \subsection{TASK4}
 This task asks me to calculate the radial distribution function $g(r)$ from the simulations. Suppose we have $N$ particles, and $\rho_N(\boldsymbol{r}_1,\cdots,\boldsymbol{r}_N)$ is called the configuration probability density, meaning that the probability for the $N$ particles being respectively in $\mathrm{d}^3\boldsymbol{r}_1,\cdots,\mathrm{d}^3\boldsymbol{r}_N$ is $\rho_N(\boldsymbol{r}_1,\cdots,\boldsymbol{r}_N)\mathrm{d}^3\boldsymbol{r}_1\cdots\mathrm{d}^3\boldsymbol{r}_N$. For a simulation box with volume $V$, the average density of the particles is $n=\frac{N}{V}$. 
@@ -586,21 +712,140 @@ We then define the pair distribution function
     \label{Eq:pair_distri}
     F_2(\boldsymbol{r}_1,\boldsymbol{r}_2)\equiv N(N-1)\int\cdots\int\rho_N(\boldsymbol{r}_1,\cdots,\boldsymbol{r}_N)\mathrm{d}^3\boldsymbol{r}_3\cdots\mathrm{d}^3\boldsymbol{r}_N
 \end{equation}
-
 As a homogeneous system has translational invariance, $F_2(\boldsymbol{r}_1,\boldsymbol{r}_2)=F_2(\boldsymbol{r}_2-\boldsymbol{r}_1)$, we introduce the radial distribution function 
 \begin{equation}
     F_2(\boldsymbol{r}_2-\boldsymbol{r}_1)\equiv n^2g(\boldsymbol{r}_2-\boldsymbol{r}_1)
 \end{equation}
-Integrating Eq. \ref{Eq:pair_distri}, we get
+Integrating Eq. \ref{Eq:pair_distri}, we get \cite{TSP}
 
 \begin{equation}
     \begin{aligned}
         N(N-1)&=\iint{F_2(\boldsymbol{r}_2-\boldsymbol{r}_1)} \\
-        &=n^2\iint{g(\boldsymbol{r}_2-\boldsymbol{r}_1)\mathrm{d}\boldsymbol{r}^3}
+        &=n^2\iint{g(\boldsymbol{r}_2-\boldsymbol{r}_1)\mathrm{d}\boldsymbol{r}^3} \\
+        &\approx n^2V\int{g(\boldsymbol{r})\mathrm{d}^3\boldsymbol{r}}
     \end{aligned}
 \end{equation}
 
+Just as in previous tasks, simulations with periodic boundary conditions result in final configurations like Fig. \ref{fig:final_config_lattice_mc1}. The radial distribution function is closely related to the probability density of finding a particle somewhere relative to another particle. I select a particle and count the number $N(r)$ of other particles around it within the distance $r$. Hence I can plot a cumulative distribution function like this
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/cumulative_distribution_1.png}
+    \caption{radial cumulative distribution 1}
+    \label{fig:cumulative_distribution_1}
+\end{figure}
+In consideration of minimum-image convention, $r$ cannot be larger than half the diameter of the simulation box, which is 5 in this case. $N(r)$ can be fitted very well to a quadratic function. Here is the result 
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/cumulative_distribution_fit.png}
+    \caption{radial cumulative distribution fitted}
+    \label{fig:cumulative_distribution_fit}
+\end{figure} 
+The fitted quadratic function is 
+\begin{equation}
+    N=2.550r^2-0.151r-0.483
+\end{equation}
+with R-squared value $R^2=0.9966$. From the definition of pair distribution function $F_2(r)$, we know that if we select two particles $1$ and $2$, then the probability of the two particles are respectively in the infinitesimal boxes $\mathrm{d}^2\boldsymbol{r}_1$ and $\mathrm{d}^2\boldsymbol{r}_2$ is 
+\begin{equation}    
+\begin{aligned}
+    \mathrm{d}^2\boldsymbol{r}_1\mathrm{d}^2\boldsymbol{r}_2\int\limits_3\cdots\int\limits_N\rho_N(\boldsymbol{r}_1,\cdots,\boldsymbol{r}_N)\mathrm{d}^2\boldsymbol{r}_3\cdots\mathrm{d}^2\boldsymbol{r}_N=\frac{F_2(\boldsymbol{r}_2-\boldsymbol{r}_1)}{N(N-1)}\mathrm{d}^2\boldsymbol{r}_1\mathrm{d}^2\boldsymbol{r}_2 \\
+    =\frac{n^2g(\boldsymbol{r})}{N(N-1)}\mathrm{d}^2\boldsymbol{r}_1\mathrm{d}^2\boldsymbol{r}
+\end{aligned}
+\end{equation}
+where $\boldsymbol{r}=\boldsymbol{r}_2-\boldsymbol{r}_1$. In the second line of the above equation, I have transformed the coordinates from $(\boldsymbol{r}_1,\boldsymbol{r}_2)$ to $(\boldsymbol{r}_1,\boldsymbol{r})$. Let us focus on particle $1$. The probability that particle 2 appears in the infinitesimal box $\mathrm{d}^2\boldsymbol{r}$ relative to particle 1 is
+\begin{equation}
+    \int\limits_1{\frac{n^2g(\boldsymbol{r})}{N(N-1)}\mathrm{d}^2\boldsymbol{r}_1\mathrm{d}^2\boldsymbol{r}}=\frac{ng(\boldsymbol{r})}{(N-1)}\mathrm{d}^2\boldsymbol{r}
+\end{equation}
+Therefore, the expected number of particles in the box $\mathrm{d}^2\boldsymbol{r}$ relative to particle 1 is
+\begin{equation}
+    \frac{Nng(\boldsymbol{r})}{(N-1)}\mathrm{d}^2\boldsymbol{r}
+\end{equation}
+and the expected number of particles that are in the range of distance $r\sim r+\mathrm{d}r$ from particle 1 is
+\begin{equation}
+    \frac{2\pi Nng(r)}{(N-1)r}\mathrm{d}r    
+\end{equation}
+which yields the relation between the cumulative distribution and radial distribution function
+\begin{equation}
+    \frac{\mathrm{d}N(r)}{\mathrm{d}r}=\frac{2\pi Nng(r)r}{(N-1)}
+\end{equation}
+Differentiating the fitted quadratic function $N(r)$, I estimate $g(r)$ and plot as follows
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/g_fitted.png}
+    \caption{$g(r)$ fitted}
+    \label{fig:g_fitted}
+\end{figure}
+For $r$ close to zero, the vertical intercept of $\mathrm{d}N/\mathrm{d}r$ divided by $r$ tends to infinity. But this contributes little to the integrations involving $g(r)$, since
+$g(r)$ is multiplied by the close-to-zero $r$, resulting in the same magnitude as the small vertical intercept. When $r$ is large,  the estimated $g(r)$ is $0.984$. Using equation (4.5.1) in textbook \cite{UMS}, 
+\begin{equation}
+    \frac{U}{N}=\pi\rho\int_0^{\infty}{ru(r)g(r)\mathrm{d}r}
+\end{equation}
+I estimate the average energy per particle
+\begin{equation}
+    \frac{U}{N}=\pi\rho_1\int_0^{r_c}{r\phi^A(r)g(r)\mathrm{d}r}
+\end{equation}
+Sadly, we cannot take $g(r)$ as a constant 0.984, because the integrand $r\phi_A(r)$ explodes at $r\rightarrow0$. The aforementioned estimation only works for large $r$, where particles are seen to be evenly distributed. For small $r$, I guess I need a Boltzmann factor to suppress the integrand. Thus I get 
+\begin{equation}
+    \frac{U}{N}=\pi\rho_1\int_0^{r_c}{r\phi^A(r)g(r)e^{-\phi_A(r)/T}\mathrm{d}r}\approx -2.674
+\end{equation}
+which agrees in terms of order of magnitude with the result of the simulation (Eq. \ref{Eq:mc_stat_lattice1}). The success of adding a Boltzmann factor implies that the real radial distribution function $g(r)$ may be the estimated $g(r)$ times a Boltzmann factor. It looks like 
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/g_with_boltzmann.png}
+    \caption{$g(r)$ fitted times $e^{-\phi(r)/T}$} 
+    \label{fig:g_with_boltzmann}
+\end{figure}
+Intuitively, the Boltzmann factor \textit{should} appear in the expression of $g(r)$ at thermal equilibrium, but I am still not sure why adding it can make the result reasonable. Perhaps there is a better way than counting particles within distance $r$ to estimate the distribution function $g(r)$. 
+
 \subsection{TASK5}
+In this task, I evaluate the pressure and study the equation of state of the system. Virial theorem states that the average kinetic energy of the system has this relation with the forces and configuration
+\begin{equation}
+    \left\langle 2K\right\rangle=-\left\langle \sum\limits_{i=1}^N{\boldsymbol{F}_i\cdot\boldsymbol{r}_i}\right\rangle
+\end{equation}
+The right-hand-side can be separated to two terms---one contains pressure, the other contains pair-wise interactions. In our 2D model, $\left\langle K\right\rangle=Nk_BT$, and $-\sum\limits_{i=1}^N{\boldsymbol{F}_i\cdot\boldsymbol{r}_i}=p\oint{\hat{n}\cdot\boldsymbol{r}\mathrm{d}l}+\sum\limits_{i=1}^N{\sum\limits_{j\neq i}{\frac{\partial v_{ij}}{\partial \boldsymbol{r}_i}\cdot\boldsymbol{r}_i}}$. Using Gaussian divergence theorem, 
+\begin{equation}                         p\oint{\hat{n}\cdot\boldsymbol{r}\mathrm{d}l}=p\iint\limits_S{\nabla\cdot\boldsymbol{r}\mathrm{d}x\mathrm{d}y}=2pS
+\end{equation}
+and Virial theorem becomes 
+\begin{equation}
+    \label{Eq:virial}
+    \begin{aligned}
+        2Nk_BT&=2pS-\sum\limits_{i=1}^N{\sum\limits_{j\neq i}{\boldsymbol{F}_{ji}\cdot\boldsymbol{r}_i}} \\
+        &=2pS-\sum\limits_{i=1}^N{\sum\limits_{j>i}{\boldsymbol{F}_{ij}\cdot\boldsymbol{r}_{ij}}} \\
+        &=2pS+\sum\limits_{i=1}^N{\sum\limits_{j>i}{\frac{\mathrm{d}v(r_{ij})}{\mathrm{d}r_{ij}}{r}_{ij}}}
+    \end{aligned}
+\end{equation}
+from which we can basically evaluate the pressure $p$. The textbook \cite{UMS} provides two kinds of correction for the potential energy and pressure: tail correction and impulsive correction. The former sums up all contributions of particles beyond the truncation distance $r_c$, which we ignored when performing the simulation; while the latter takes into account the discontinuity in the potential caused by the truncation and arrives at an extra pressure $\Delta P^{imp}$. However, the atomic potential $\phi_A$ we use is well-behaved at all points including $r_c$, i.e. both its value and its derivative are continuous. I do not think it is necessary to consider tail or impulsive correction. Anyway, I calculate the tail correction just to compare its magnitude with the Virial result. 
+
+From Eq. \ref{Eq:virial}, we explicitly derive the equation of state
+\begin{equation}
+    p=\rho T-\sum\limits_{i=1}^N{\sum\limits_{j>i}{\frac{1}{2S}\frac{\mathrm{d}v(r_{ij})}{\mathrm{d}r_{ij}}{r}_{ij}}}
+\end{equation}
+Changing $\rho$ and running the simulations, I get the phase diagram of $T_3=0.9$
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/phase_diagram1.png}
+    \caption{phase diagram at $T_3$}
+    \label{fig:phase_diagram1}
+\end{figure}
+Comparing this phase diagram to Figure 3.5 in textbook \cite{UMS}, we see $T_3$ is below the critical temperature. There are some errors in the calculation of $p$. From simulations above we know that the system is most stable when $\rho$ is around $\rho_1$, where $p$ will be smallest. But in this diagram $p$ reaches minimum elsewhere. 
+
+I also get the phase diagram for $T_4=2.0$
+\begin{figure}[H]
+    \centering
+    \includegraphics{Project/phase_diagram2.png}
+    \caption{phase diagram at $T_4$}
+    \label{fig:phase_diagram2}
+\end{figure}
+Here the pressure never goes down below zero. I suspect that the system undergoes a phase transition from $T=T_3$ to $T=T_4$. At $T=T_3$, there are some forces that bring the particles together, forming something like solid; while at $T=T_4$, there is no such force, and the system keeps expanding to something like liquid or gas. 
+
+Finally, the tail correction of pressure (for Lennard-Jones potential):
+\begin{equation}
+    \Delta P^{\mathrm{tail}}=\pi\rho^2\int_{r_c}^\infty{r^2f(r)\mathrm{d}r}=\frac{8\pi\rho^2}{3}\left(\frac{3}{5r_c^{10}}-\frac{3}{4r_c^4}\right)
+\end{equation}
+Plugging in the data, $r_c=2,\ \rho=\rho_1$, then
+\begin{equation}
+    \Delta P^{\mathrm{tail}}=-0.276
+\end{equation}
+Not a lot, but also not negligible. 
 
 %\begin{figure}[ht] 
         % read manual to see what [ht] means and for other possible options
@@ -620,44 +865,21 @@ Integrating Eq. \ref{Eq:pair_distri}, we get
 %        }
 %\end{figure}
 
-and eventually arrived to the
-
-
 
 \section{Results and Conclusions}
 
-Here you briefly summarize your findings. Did you learn any new physics? Was everything as expected?
-
-In this section you will need to show your experimental results. Use tables and
-
-
 In this project, TASK 2 is the most crucial part. It includes two sets of initial conditions: random positions and ordered lattice, involves two sets of fixed conditions: $T_1,\ \rho_1$ and $T_2,\ \rho_2$, and applies both the MC and MD simulation methods. To finish this task, I must have thorough understanding for both methods. Moreover, comparing results obtained from different conditions and different simulation methods, I can get a glimpse of the physics inside. 
 
-\begin{table}[ht]
-\begin{center}
-\caption{Every table needs a caption.}
-\label{tbl:bins} % spaces are big no-no withing labels
-\begin{tabular}{|cc|} 
-\hline
-\multicolumn{1}{|c}{$x$ (m)} & \multicolumn{1}{c|}{$V$ (V)} \\
-\hline
-0.0044151 &   0.0030871 \\
-0.0021633 &   0.0021343 \\
-0.0003600 &   0.0018642 \\
-0.0023831 &   0.0013287 \\
-\hline
-\end{tabular}
-\end{center}
-\end{table}
+TASK 3 is to look at the affect of system size $N$ on the result. I find periodic boundary condition works well with varying sizes. 
 
+In TASK 4, I struggle to estimate the radial distribution function, and my estimation hardly agrees with the theory and examples provided in the textbook. I think my main obstacle is that I do not have a good approach to calculating $g(r)$. My minimum resolution distance is the interatomic distance, which is too large and inaccurate. 
 
-
-For example, it is easy to conclude that the
-experiment and theory match each other rather well if you look at
-
+In TASK 5, I calculate the pressure and obtain phase diagrams. Problems in other tasks remain in this task, such as inconsistency among repeated simulations, sensitive dependence on initial conditions, discrepancy with theoretical predictions, etc. At least, I find that increasing the temperature over the critical temperature causes phase transition. 
 
 \section{Future Work}
-Since you had limited time to work on this project, what questions are left outstanding? What would be your next steps? 
+Since I had limited time to work on this project, there must be many imprecisions, errors and oversights in this project. Apart from knowing that the particle's displacement at each step must be significantly smaller than the interatomic distance, I am still unclear about how to choose the random displacement vector for Monte Carlo simulations, the initial temperature for molecular dynamics simulations, the strength of thermal coupling, and the time step. There are also numerous physical models, equation-solving algorithms, particle configurations, potential functions, media, phases, etc., most of which I have never heard of or have little knowledge. 
+
+In future research and studies, I may have the opportunity to explore more diverse and comprehensive simulation methods for investigating materials with different scales and structural properties. I may also enhance my algorithm and programming skills, and have access to greater computational resources to tackle more extensive computational physics problems. At that time, many of these current challenges will be resolved, but new ones will undoubtedly arise. The exploration of computational physics simulations is an endless journey.
 
 %\cite{UMS}
 
